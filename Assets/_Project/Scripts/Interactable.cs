@@ -2,38 +2,69 @@ using UnityEngine;
 
 public class Interactable : MonoBehaviour
 {
-    public bool isBroken = false;
-    public Material brokenMaterial; // Сюда перетащим красный материал
-    public Material normalMaterial; // Сюда перетащим синий/зеленый материал
+    [Header("Материалы для замены")]
+    public Material normalMat; // Сюда перетащим GreenMat (целый)
+    public Material brokenMat; // Сюда перетащим RedMat (сломанный)
+    public float scoreImpact = 10f; // На сколько изменится шкала
 
-    private Renderer objectRenderer;
+    private bool isBroken = false;
+    private MeshRenderer meshRenderer;
 
     void Start()
     {
-        // Получаем компонент Renderer (чтобы менять цвет)
-        objectRenderer = GetComponentInChildren<Renderer>();
-        if (objectRenderer != null && normalMaterial != null)
+        meshRenderer = GetComponent<MeshRenderer>();
+        UpdateVisuals();
+    }
+
+    public void Interact(RoleType playerRole)
+    {
+        if (playerRole == RoleType.Crasher) // Вредитель
         {
-            objectRenderer.material = normalMaterial;
+            if (!isBroken)
+            {
+                isBroken = true;
+                Debug.Log(gameObject.name + " СЛОМАН!");
+                UpdateVisuals();
+
+                // ДОБАВЛЕНО: Отнимаем очки
+                if (MatchManager.Instance != null)
+                    MatchManager.Instance.ChangeScore(-scoreImpact);
+            }
+            else
+            {
+                Debug.Log("Тут уже всё сломано!");
+            }
+        }
+        else if (playerRole == RoleType.Rescuer) // Спасатель
+        {
+            if (isBroken)
+            {
+                isBroken = false;
+                Debug.Log(gameObject.name + " ПОЧИНЕН!");
+                UpdateVisuals();
+                if (MatchManager.Instance != null)
+                    MatchManager.Instance.ChangeScore(scoreImpact);
+            }
+            else
+            {
+                Debug.Log("Тут и так всё в порядке!");
+            }
         }
     }
 
-    public virtual void Interact()
+    private void UpdateVisuals()
     {
-        // Меняем состояние на противоположное
-        isBroken = !isBroken;
-
-        if (isBroken)
+        if (meshRenderer != null)
         {
-            Debug.Log(gameObject.name + " СЛОМАН!");
-            if (objectRenderer != null && brokenMaterial != null)
-                objectRenderer.material = brokenMaterial;
-        }
-        else
-        {
-            Debug.Log(gameObject.name + " ПОЧИНЕН!");
-            if (objectRenderer != null && normalMaterial != null)
-                objectRenderer.material = normalMaterial;
+            // Теперь мы не перекрашиваем, а полностью меняем материал
+            if (isBroken)
+            {
+                meshRenderer.material = brokenMat;
+            }
+            else
+            {
+                meshRenderer.material = normalMat;
+            }
         }
     }
 }
