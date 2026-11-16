@@ -1,6 +1,6 @@
 using UnityEngine;
+using TMPro; // Добавляем для вывода текста на экран
 
-// Создаем два возможных состояния
 public enum RoleType
 {
     Crasher, // Вредитель
@@ -9,21 +9,42 @@ public enum RoleType
 
 public class PlayerRole : MonoBehaviour
 {
-    public RoleType currentRole = RoleType.Crasher; // По умолчанию мы Вредитель
+    public RoleType currentRole;
+
+    [Header("UI для показа роли")]
+    public TextMeshProUGUI roleText; // Сюда перетащим текст роли на экране
+
+    void Start()
+    {
+        // Генерируем случайное число от 0 до 1 (0 или 1)
+        int randomRole = Random.Range(0, 2);
+
+        if (randomRole == 0)
+        {
+            currentRole = RoleType.Crasher;
+            if (roleText != null) roleText.text = "ТЫ: ВРЕДИТЕЛЬ (Ломай всё!)";
+            Debug.Log("Ты - Вредитель");
+        }
+        else
+        {
+            currentRole = RoleType.Rescuer;
+            if (roleText != null) roleText.text = "ТЫ: СПАСАТЕЛЬ (Чини всё!)";
+            Debug.Log("Ты - Спасатель");
+        }
+    }
 
     void Update()
     {
-        // Тестовая кнопка 1 - стать Вредителем
+        // Оставляем кнопки 1 и 2 для тестов, но в будущем их уберем
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             currentRole = RoleType.Crasher;
-            Debug.Log("Я - ВРЕДИТЕЛЬ (ломаю)");
+            if (roleText != null) roleText.text = "ТЕСТ: ВРЕДИТЕЛЬ";
         }
-        // Тестовая кнопка 2 - стать Спасателем
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             currentRole = RoleType.Rescuer;
-            Debug.Log("Я - СПАСАТЕЛЬ (чиню)");
+            if (roleText != null) roleText.text = "ТЕСТ: СПАСАТЕЛЬ";
         }
     }
 }
